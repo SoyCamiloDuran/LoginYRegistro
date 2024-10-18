@@ -1,0 +1,64 @@
+package com.camiloduran.controladores;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+
+import com.camiloduran.modelos.Usuario;
+import com.camiloduran.modelos.UsuarioLogin;
+import com.camiloduran.servicios.ServicioUsuarios;
+
+import jakarta.validation.Valid;
+
+@Controller
+public class ControladorUsuario {
+	@Autowired
+	private final ServicioUsuarios servicioUsuarios;
+	
+	public ControladorUsuario(ServicioUsuarios servicioUsuarios) {
+		this.servicioUsuarios = servicioUsuarios;
+	}
+	
+	@ModelAttribute
+    public void addAttributes(@ModelAttribute Usuario usuario, @ModelAttribute UsuarioLogin usuarioLogin, Model model) {
+        if (!model.containsAttribute("usuario")) {
+            model.addAttribute("usuario", usuario);
+        }
+        if (!model.containsAttribute("usuarioLogin")) {
+            model.addAttribute("usuarioLogin", usuarioLogin);
+        }
+    }
+	
+	@GetMapping("/")
+    public String mostrarFormulario(Model model) {
+       return "index.jsp";
+    }
+	
+	@GetMapping("/inicio")
+    public String inicio() {
+        return "inicio.jsp";
+    }
+	
+	@PostMapping("/procesa/registro")
+    public String registrarUsuario(@Valid @ModelAttribute Usuario usuario, BindingResult validation, Model model) {
+		validation = this.servicioUsuarios.validarRegistro(validation, usuario);
+		if (validation.hasErrors()) {
+            return "index.jsp";
+        }
+        servicioUsuarios.insertarUsuario(usuario);
+        return "redirect:/inicio";
+    }
+	
+    @PostMapping("/procesa/login")
+    public String loginUsuario(@Valid @ModelAttribute UsuarioLogin usuarioLogin, BindingResult validation) {
+    	validation = this.servicioUsuarios.validarLogin(validation, usuarioLogin);
+        if(validation.hasErrors()) {
+			return "index.jsp";
+		}
+        return "redirect:/inicio";
+    }
+}
