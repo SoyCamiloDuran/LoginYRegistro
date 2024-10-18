@@ -12,6 +12,7 @@ import com.camiloduran.modelos.Usuario;
 import com.camiloduran.modelos.UsuarioLogin;
 import com.camiloduran.servicios.ServicioUsuarios;
 
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 
 @Controller
@@ -39,26 +40,47 @@ public class ControladorUsuario {
     }
 	
 	@GetMapping("/inicio")
-    public String inicio() {
+    public String inicio(HttpSession session) {
+		if(session.getAttribute("id") == null) {
+			return "redirect:/";
+		}
         return "inicio.jsp";
     }
 	
 	@PostMapping("/procesa/registro")
-    public String registrarUsuario(@Valid @ModelAttribute Usuario usuario, BindingResult validation, Model model) {
+    public String registrarUsuario(@Valid @ModelAttribute Usuario usuario, BindingResult validation, HttpSession session) {
 		validation = this.servicioUsuarios.validarRegistro(validation, usuario);
 		if (validation.hasErrors()) {
             return "index.jsp";
         }
         servicioUsuarios.insertarUsuario(usuario);
+        session.setAttribute("id", usuario.getId());
+        session.setAttribute("correo", usuario.getCorreo());
+        session.setAttribute("nombreUsuario", usuario.getNombreUsuario());
+        session.setAttribute("fechaDeNacimiento", usuario.getFechaDeNacimiento());
+        session.setAttribute("nombreYApellido", usuario.getNombre() + " " + usuario.getApellido());
         return "redirect:/inicio";
     }
 	
+    
     @PostMapping("/procesa/login")
-    public String loginUsuario(@Valid @ModelAttribute UsuarioLogin usuarioLogin, BindingResult validation) {
-    	validation = this.servicioUsuarios.validarLogin(validation, usuarioLogin);
+    public String loginUsuario(@Valid @ModelAttribute UsuarioLogin usuarioLogin, BindingResult validation, HttpSession session, Model model) {
+        validation = this.servicioUsuarios.validarLogin(validation, usuarioLogin);
         if(validation.hasErrors()) {
-			return "index.jsp";
-		}
+            return "index.jsp";
+        }
+        Usuario usuario = this.servicioUsuarios.obtenerUsuarioParaLogin(usuarioLogin.getNombreUsuarioLogin());
+        session.setAttribute("id", usuario.getId());
+        session.setAttribute("correo", usuario.getCorreo());
+        session.setAttribute("nombreUsuario", usuario.getNombreUsuario());
+        session.setAttribute("fechaDeNacimiento", usuario.getFechaDeNacimiento());
+        session.setAttribute("nombreYApellido", usuario.getNombre() + " " + usuario.getApellido());
         return "redirect:/inicio";
+    }
+    
+    @PostMapping("/procesa/logout")
+    public String logout(HttpSession sesion) {
+    	sesion.invalidate();
+    	return "redirect:/";
     }
 }

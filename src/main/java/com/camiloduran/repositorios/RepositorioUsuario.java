@@ -12,6 +12,6 @@ public interface RepositorioUsuario extends CrudRepository<Usuario, Long>{
 	List<Usuario> findAll();
 	
 	Usuario findByNombreUsuario(String nombreUsuario);
-	Usuario findByNombreUsuarioAndContrasenia(String nombreUsuario, String contrasenia);
+//	Usuario findByNombreUsuarioAndContrasenia(String nombreUsuario, String contrasenia);
 	
 }

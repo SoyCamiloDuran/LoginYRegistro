@@ -34,8 +34,8 @@ public class ServicioUsuarios {
 		return this.repositorioUsuario.save(nuevoUsuario);
 	}
 	
-	public Usuario obtenerUsuarioParaLogin(String nombreUsuario, String contrasenia) {
-		return this.repositorioUsuario.findByNombreUsuarioAndContrasenia(nombreUsuario, contrasenia);
+	public Usuario obtenerUsuarioParaLogin(String nombreUsuario) {
+		return this.repositorioUsuario.findByNombreUsuario(nombreUsuario);
 	}
 	
 	public BindingResult validarRegistro(BindingResult validation, Usuario usuario) {
